@@ -1,12 +1,12 @@
 import streamlit as st
 from onno import *
 
-if st.session_state['logged_in'] == None:
+if not 'logged_in' in st.session_state:
     auth = Auth()
     auth.display()
 else:
     st.sidebar.title("Nav")
-    selection = st.sidebar.radio('', ["Data", "Chatbot", 'Settings', 'Temp'])
+    selection = st.sidebar.radio('', ["Temp", "Data", "Chatbot", 'Settings'])
 
     if selection == "Temp":
         temp = Temp()

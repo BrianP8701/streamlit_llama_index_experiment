@@ -6,7 +6,7 @@ from onno.shared.constants import path_to_firebase_credentials
 
 # Initialize Firestore
 if not firebase_admin._apps:
-    cred = credentials.Certificate("path/to/credentials.json")
+    cred = credentials.Certificate(path_to_firebase_credentials)
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
