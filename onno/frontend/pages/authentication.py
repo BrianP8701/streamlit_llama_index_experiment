@@ -1,7 +1,8 @@
 import streamlit as st
-from onno.shared.utils.auth import check_username_exists, hash_password, save_user_info, get_password, check_password
-
-class Auth:
+from onno.shared.utils.authentication_utils import check_username_exists, hash_password, get_password, check_password
+from onno.frontend.helpers.user_utils import initialize_user_info
+from onno.shared.utils.database_utils import retrieve_user_info
+class Authentication:
     def __init__(self):
         pass
     
@@ -18,9 +19,10 @@ class Auth:
                     if check_password(password, get_password(username)):
                         st.success("Logged In as {}".format(username))
                         st.session_state['logged_in'] = True
+                        st.session_state['username'] = username
+                        st.session_state['user_info'] = retrieve_user_info(username)
                         st.rerun()
                     else:
-                        
                         st.error(f"Incorrect Password: {str(hash_password(password))} != {get_password(username)}")
                 else:
                     st.error("Username does not exist")
@@ -34,12 +36,9 @@ class Auth:
                 if check_username_exists(username):
                     st.error("Username already exists")
                 else:
-                    user_info = {
-                        'username': username,
-                        'password': hash_password(password),
-                        'email': email
-                    }
-                    save_user_info(username, user_info)
+                    user_info = initialize_user_info(username, hash_password(password), email)
                     st.success("Signed up as {}".format(username))
                     st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.session_state['user_info'] = user_info
                     st.rerun()
