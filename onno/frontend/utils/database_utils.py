@@ -5,6 +5,7 @@ from onno.shared.constants import path_to_firebase_credentials, path_to_gcp_serv
 from google.cloud import storage
 from google.oauth2 import service_account
 
+
 if not firebase_admin._apps:
     cred = credentials.Certificate(path_to_firebase_credentials)
     firebase_admin.initialize_app(cred)
@@ -48,3 +49,8 @@ def save_uploaded_file_to_gcs(uploaded_file, destination_blob_name):
     bucket = get_bucket()
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_file(uploaded_file, content_type=uploaded_file.type)
+    
+def does_file_exists_in_gcs(blob_name):
+    bucket = get_bucket()
+    blob = bucket.blob(blob_name)
+    return blob.exists()
