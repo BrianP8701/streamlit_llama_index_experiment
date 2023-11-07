@@ -26,8 +26,6 @@ import openai
 import warnings
 import json
 
-openai.api_key = "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"
-
 class PDFLoader():
     def __init__(self):
         self.scrapers = [
