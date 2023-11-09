@@ -5,6 +5,7 @@ __pycache__/
 *$py.class
 secrets/
 notes.txt
+.streamlit/secrets.toml
 # C extensions
 *.so
 onno/frontend/constants/secret_keys.py

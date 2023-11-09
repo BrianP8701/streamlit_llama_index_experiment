@@ -19,17 +19,14 @@ from pypdf import PdfReader
 from pdf2image import convert_from_bytes
 import pytesseract
 import random
-import json
 from pdfminer.layout import LTTextBoxHorizontal
 from pdfminer.high_level import extract_pages
-import openai
-import warnings
-import json
 from onno.frontend.utils.myopenai import MyOpenAI
 from onno.frontend.constants.tool_schemas.data import CHOOSE_BEST_SAMPLE_SCHEMA, CHOOSE_BEST_SAMPLE_SYSTEM_MESSAGE, CHOOSE_BEST_SAMPLE_TOOL
 
 class PDFLoader():
-    def __init__(self):
+    def __init__(self, openai_api_key):
+        self.openai_api_key = openai_api_key
         self.scrapers = [
             self.pdfplumber_scraper,
             self.pypdf2_scraper,
@@ -110,7 +107,7 @@ class PDFLoader():
         '''
         user_prompt = ''
         index = 1
-        myopenai = MyOpenAI(temprature=0, top_p=0)
+        myopenai = MyOpenAI(api_key=self.openai_api_key, temprature=0, top_p=0)
         for sample in samples:
             user_prompt += f'{index}: {sample}\n'
         messages = [CHOOSE_BEST_SAMPLE_SYSTEM_MESSAGE, {"role": "user", "content": user_prompt}]

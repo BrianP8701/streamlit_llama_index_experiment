@@ -1,6 +1,5 @@
 from apify_client import ApifyClient
 from typing import List
-from onno.frontend.constants.secret_keys import APIFY_KEY
 
 class WebScraper():
     '''
@@ -13,6 +12,9 @@ class WebScraper():
     - This function requires the APIFY_KEY to be set and valid.
     - For more details on Apify's Website Content Crawler, visit: https://apify.com/apify/website-content-crawler
     '''
+    def __init__(self, apify_key):
+        self.apify_key = apify_key
+        
     def scrape(self, url, includeUrlGlobs=[], excludeUrlGlobs=[]):
         """
         This function leverages Apify's Website Content Crawler to extract content from websites. 
@@ -32,7 +34,7 @@ class WebScraper():
         >>> print(result)
         """
         # Initialize the ApifyClient with your API token
-        client = ApifyClient(APIFY_KEY)
+        client = ApifyClient(self.apify_key)
 
         # Prepare the Actor input
         run_input = {

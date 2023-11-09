@@ -1,6 +1,8 @@
 import streamlit as st
 from onno import *
+from onno.frontend.utils.database_utils import Database
 
+st.session_state['DATABASE'] = Database(st.secrets['GOOGLE_FIREBASE_KEY'], st.secrets['GOOGLE_SERVICE_ACCOUNT_KEY'])
 if not 'logged_in' in st.session_state:
     auth = Authentication()
     auth.display()

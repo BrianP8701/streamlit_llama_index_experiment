@@ -1,14 +1,8 @@
 import os
 from openai import OpenAI
 
-try:
-    api_key = os.getenv('OPEN_API_KEY')
-except:
-    print("Set your OPENAI_API_KEY environment variable to your OpenAI API key")
-
-
 class MyOpenAI:
-    def __init__(self, model='gpt-4-1106-preview', temprature=1, top_p=1):
+    def __init__(self, api_key, model='gpt-4-1106-preview', temprature=1, top_p=1):
         self.model = model
         self.temprature = temprature
         self.top_p = top_p

@@ -1,7 +1,7 @@
 import streamlit as st
 from onno.frontend.utils.authentication_utils import check_username_exists, hash_password, get_password, check_password
 from onno.frontend.utils.user_utils import initialize_user_info
-from onno.frontend.utils.database_utils import retrieve_user_info
+
 class Authentication:
     def __init__(self):
         pass
@@ -20,7 +20,7 @@ class Authentication:
                         st.success("Logged In as {}".format(username))
                         st.session_state['logged_in'] = True
                         st.session_state['username'] = username
-                        st.session_state['user_info'] = retrieve_user_info(username)
+                        st.session_state['user_info'] = st.session_state['DATABASE'].retrieve_user_info(username)
                         st.rerun()
                     else:
                         st.error(f"Incorrect Password: {str(hash_password(password))} != {get_password(username)}")

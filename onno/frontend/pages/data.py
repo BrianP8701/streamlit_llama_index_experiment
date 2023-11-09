@@ -1,10 +1,8 @@
 import streamlit as st
-from onno.frontend.utils.database_utils import retrieve_user_info, save_user_info, save_uploaded_file_to_gcs, does_file_exists_in_gcs, save_string_to_gcs
 from onno.frontend.utils.user_utils import create_new_empty_library
 from onno.frontend.data_loaders.pdf_loader import PDFLoader
 from onno.frontend.data_loaders.web_loader import WebScraper
 from onno.frontend.data_loaders.github_loader import RepoScraper
-import io
 
 class Data:
     def __init__(self):
@@ -33,7 +31,7 @@ class Data:
                 else: # create new empty library in database
                     user_info = st.session_state['user_info']
                     user_info['libraries'][new_library_name] = []
-                    save_user_info(st.session_state['username'], user_info)
+                    st.session_state['DATABASE'].save_user_info(st.session_state['username'], user_info)
                     st.session_state['user_info'] = user_info
                     create_new_empty_library(st.session_state['username'], new_library_name)
                     st.success(f'Created new library: {new_library_name}')
@@ -57,21 +55,21 @@ class Data:
                             st.error('Please enter a document name')
                         elif document_name in st.session_state['user_info']['libraries'][library]:
                             st.error(f'Document name already exists in library: {library}')
-                        elif does_file_exists_in_gcs(f'users/{st.session_state["username"]}/libraries/{library}/text/{document_name.replace(" ", "_")}.txt'):
+                        elif st.session_state['DATABASE'].does_file_exists_in_gcs(f'users/{st.session_state["username"]}/libraries/{library}/text/{document_name.replace(" ", "_")}.txt'):
                             st.error(f'File already exists in library: {library}')
                         else:
                             with st.spinner(f'Extracting and uploading {uploaded_file.name}, please wait...'):
-                                save_uploaded_file_to_gcs(uploaded_file, f'users/{st.session_state["username"]}/libraries/{library}/raw/{document_name.replace(" ", "_")}.pdf')
-                                pdfloader = PDFLoader()
+                                st.session_state['DATABASE'].save_uploaded_file_to_gcs(uploaded_file, f'users/{st.session_state["username"]}/libraries/{library}/raw/{document_name.replace(" ", "_")}.pdf')
+                                pdfloader = PDFLoader(st.secrets['OPENAI_KEY'])
                                 extracted_text = pdfloader.pypdf2_scraper(uploaded_file)
-                                save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{document_name.replace(" ", "_")}.txt')
+                                st.session_state['DATABASE'].save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{document_name.replace(" ", "_")}.txt')
                                 user_info = st.session_state['user_info']
                                 user_info['libraries'][library].append({
                                     'name': document_name,
                                     'type': 'pdf',
                                     'metadata': document_metadata
                                 })
-                                save_user_info(st.session_state['username'], user_info)
+                                st.session_state['DATABASE'].save_user_info(st.session_state['username'], user_info)
                                 st.success(f'Uploaded {uploaded_file.name} to {library}')
             else:
                 st.error('Please select a library first')
@@ -87,16 +85,16 @@ class Data:
                 if url:
                     if st.button('Load data'):
                         with st.spinner(f'Scraping {url}, please wait...'):
-                            webloader = WebScraper()
+                            webloader = WebScraper(st.secrets['APIFY_KEY'])
                             extracted_text = webloader.scrape(url)
-                            save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{url.replace(" ", "_").replace("/", "_")}.json')
+                            st.session_state['DATABASE'].save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{url.replace(" ", "_").replace("/", "_")}.json')
                             user_info = st.session_state['user_info']
                             user_info['libraries'][library].append({
                                 'name': url,
                                 'type': 'website',
                                 'metadata': website_metadata
                             })
-                            save_user_info(st.session_state['username'], user_info)
+                            st.session_state['DATABASE'].save_user_info(st.session_state['username'], user_info)
                             st.success(f'Scraped {url} to {library}')
             else:
                 st.error('Please select a library first')
@@ -114,14 +112,14 @@ class Data:
                         with st.spinner(f'Scraping {url}, please wait...'):
                             webloader = RepoScraper()
                             extracted_text = webloader.scrape(url)
-                            save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{url.replace(" ", "_").replace("/", "_")}.json')
+                            st.session_state['DATABASE'].save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{url.replace(" ", "_").replace("/", "_")}.json')
                             user_info = st.session_state['user_info']
                             user_info['libraries'][library].append({
                                 'name': url,
                                 'type': 'github',
                                 'metadata': document_metadata
                             })
-                            save_user_info(st.session_state['username'], user_info)
+                            st.session_state['DATABASE'].save_user_info(st.session_state['username'], user_info)
                             st.success(f'Scraped {url} to {library}')
             else:
                 st.error('Please select a library first')

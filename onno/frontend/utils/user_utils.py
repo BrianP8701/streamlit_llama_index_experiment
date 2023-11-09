@@ -1,4 +1,4 @@
-from onno.frontend.utils.database_utils import save_user_info, create_folder
+import streamlit as st
 
 def initialize_user_info(username: str, hashed_password: str, email: str):
     user_info = {
@@ -7,11 +7,11 @@ def initialize_user_info(username: str, hashed_password: str, email: str):
         'email': email,
         'libraries': {}
     }
-    save_user_info(username, user_info)
-    create_folder(f'users/{username}/libraries/')
+    st.session_state['DATABASE'].save_user_info(username, user_info)
+    st.session_state['DATABASE'].create_folder(f'users/{username}/libraries/')
     return user_info
 
 def create_new_empty_library(username: str, library_name: str):
-    create_folder(f'users/{username}/libraries/{library_name}/raw/')
-    create_folder(f'users/{username}/libraries/{library_name}/text/')
+    st.session_state['DATABASE'].create_folder(f'users/{username}/libraries/{library_name}/raw/')
+    st.session_state['DATABASE'].create_folder(f'users/{username}/libraries/{library_name}/text/')
     
