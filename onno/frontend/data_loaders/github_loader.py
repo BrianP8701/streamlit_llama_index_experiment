@@ -1,11 +1,10 @@
 import requests
 import base64
 from typing import List
-from onno.frontend.constants.secret_keys import GITHUB_KEY
 
 class RepoScraper():
-    def __init__(self):
-        self.token = GITHUB_KEY
+    def __init__(self, github_key):
+        self.token = github_key
 
     def scrape(self, repo_url, ignore_folders=["venv"], ignore_files=[]):
         """

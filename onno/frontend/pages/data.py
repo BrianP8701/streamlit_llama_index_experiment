@@ -110,7 +110,7 @@ class Data:
                 if url:
                     if st.button('Load data'):
                         with st.spinner(f'Scraping {url}, please wait...'):
-                            webloader = RepoScraper()
+                            webloader = RepoScraper(st.secrets['GITHUB_KEY'])
                             extracted_text = webloader.scrape(url)
                             st.session_state['DATABASE'].save_string_to_gcs(''.join(extracted_text), f'users/{st.session_state["username"]}/libraries/{library}/text/{url.replace(" ", "_").replace("/", "_")}.json')
                             user_info = st.session_state['user_info']
