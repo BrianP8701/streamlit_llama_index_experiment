@@ -4,6 +4,7 @@ from firebase_admin import firestore
 from google.cloud import storage
 from google.oauth2 import service_account
 import json
+import bcrypt
 
 class Database:
     def __init__(self, firebase_key, gcp_service_account_credentials):
@@ -56,3 +57,23 @@ class Database:
     def save_string_to_gcs(self, string_data, destination_blob_name):
         blob = self.bucket.blob(destination_blob_name)
         blob.upload_from_string(string_data, content_type='text/plain')
+
+    def get_password(self, username: str) -> str:
+        doc_ref = self.db.collection('users').document(username)
+        doc = doc_ref.get()
+        if doc.exists:
+            return doc.to_dict()['password']
+        else:
+            return None
+
+    def check_username_exists(self, username: str) -> bool:
+        doc_ref = self.db.collection('users').document(username)
+        doc = doc_ref.get()
+        return doc.exists
+
+    def hash_password(password: str) -> str:
+        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        return hashed.decode()
+
+    def check_password(password: str, hashed_password: str) -> bool:
+        return bcrypt.checkpw(password.encode(), hashed_password.encode())

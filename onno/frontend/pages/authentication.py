@@ -1,5 +1,4 @@
 import streamlit as st
-from onno.frontend.utils.authentication_utils import check_username_exists, hash_password, get_password, check_password
 from onno.frontend.utils.user_utils import initialize_user_info
 
 class Authentication:
@@ -15,15 +14,15 @@ class Authentication:
             username = st.text_input("Username", key='login_username')
             password = st.text_input("Password", key='login_password', type="password")
             if st.button("Login"):
-                if check_username_exists(username):
-                    if check_password(password, get_password(username)):
+                if st.session_state['DATABASE'].check_username_exists(username):
+                    if st.session_state['DATABASE'].check_password(password, st.session_state['DATABASE'].get_password(username)):
                         st.success("Logged In as {}".format(username))
                         st.session_state['logged_in'] = True
                         st.session_state['username'] = username
                         st.session_state['user_info'] = st.session_state['DATABASE'].retrieve_user_info(username)
                         st.rerun()
                     else:
-                        st.error(f"Incorrect Password: {str(hash_password(password))} != {get_password(username)}")
+                        st.error(f"Incorrect Password: {str(st.session_state['DATABASE'].hash_password(password))} != {st.session_state['DATABASE'].get_password(username)}")
                 else:
                     st.error("Username does not exist")
 
@@ -33,10 +32,10 @@ class Authentication:
             password = st.text_input("Password", key='signup_password', type="password")
             email = st.text_input("Email")
             if st.button("Sign Up"):
-                if check_username_exists(username):
+                if st.session_state['DATABASE'].check_username_exists(username):
                     st.error("Username already exists")
                 else:
-                    user_info = initialize_user_info(username, hash_password(password), email)
+                    user_info = initialize_user_info(username, st.session_state['DATABASE'].hash_password(password), email)
                     st.success("Signed up as {}".format(username))
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = username
