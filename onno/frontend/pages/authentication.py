@@ -1,7 +1,7 @@
 import streamlit as st
-from onno.shared.utils.authentication_utils import check_username_exists, hash_password, get_password, check_password
-from onno.frontend.helpers.user_utils import initialize_user_info
-from onno.shared.utils.database_utils import retrieve_user_info
+from onno.frontend.utils.authentication_utils import check_username_exists, hash_password, get_password, check_password
+from onno.frontend.utils.user_utils import initialize_user_info
+from onno.frontend.utils.database_utils import retrieve_user_info
 class Authentication:
     def __init__(self):
         pass

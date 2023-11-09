@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from onno.shared.constants import path_to_firebase_credentials, path_to_gcp_service_account_credentials
+from onno.frontend.constants.keys import path_to_firebase_credentials, path_to_onno_gcp_service_account_credentials
 from google.cloud import storage
 from google.oauth2 import service_account
 
@@ -12,7 +12,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 def get_client():
-    creds = service_account.Credentials.from_service_account_file(path_to_gcp_service_account_credentials)
+    creds = service_account.Credentials.from_service_account_file(path_to_onno_gcp_service_account_credentials)
     storage_client = storage.Client(credentials=creds)
     return storage_client
 
@@ -54,3 +54,8 @@ def does_file_exists_in_gcs(blob_name):
     bucket = get_bucket()
     blob = bucket.blob(blob_name)
     return blob.exists()
+
+def save_string_to_gcs(string_data, destination_blob_name):
+    bucket = get_bucket()
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_string(string_data, content_type='text/plain')

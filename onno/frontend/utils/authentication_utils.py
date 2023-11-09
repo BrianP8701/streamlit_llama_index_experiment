@@ -2,7 +2,7 @@ import bcrypt
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from onno.shared.constants import path_to_firebase_credentials
+from onno.frontend.constants.keys import path_to_firebase_credentials
 
 # Initialize Firestore
 if not firebase_admin._apps:

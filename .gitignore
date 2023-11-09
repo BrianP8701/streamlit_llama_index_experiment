@@ -7,7 +7,7 @@ secrets/
 notes.txt
 # C extensions
 *.so
-
+onno/frontend/constants/secret_keys.py
 # Distribution / packaging
 .Python
 build/

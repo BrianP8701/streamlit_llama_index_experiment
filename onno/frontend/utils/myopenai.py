@@ -45,7 +45,3 @@ class MyOpenAI:
         if resp.choices[0].finish_reason != 'stop':
             raise Exception(f"OpenAI chat completion failed with reason: {resp['choices'][0]['finish_reason']}")
         return resp, resp.choices[0].message.tool_calls[0].function.arguments
-    
-    
-myopenai = MyOpenAI(temprature=0, top_p=0)
-print(myopenai.complete("Hello, I'm a human.")[1])

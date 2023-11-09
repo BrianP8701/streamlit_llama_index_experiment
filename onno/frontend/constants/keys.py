@@ -10,4 +10,6 @@ To obtain the credentials.json file for Firebase:
 '''
 path_to_firebase_credentials = '/Users/brianprzezdziecki/Code/onno/secrets/onno-404216-firebase-adminsdk-3ejg7-6ea6cb91cc.json'
 
-path_to_gcp_service_account_credentials = '/Users/brianprzezdziecki/Code/onno/secrets/onno-404216-b073f407c6eb.json'
+path_to_onno_gcp_service_account_credentials = '/Users/brianprzezdziecki/Code/onno/secrets/onno-404216-b073f407c6eb.json'
+
+path_to_oihackathon_gcp_service_account_credentials = '/Users/brianprzezdziecki/Code/onno/secrets/GOOGLE_APPLICATION_CREDENTIALS.json'

@@ -5,12 +5,9 @@ if not 'logged_in' in st.session_state:
     auth = Authentication()
     auth.display()
 else:
-    st.sidebar.title("Nav")
-    selection = st.sidebar.radio('', ["Temp", "Data", "Chatbot", 'Settings'])
+    st.sidebar.title("Onno")
+    selection = st.sidebar.radio('', ["Data", "Chatbot", 'Settings'])
 
-    if selection == "Temp":
-        temp = Temp()
-        temp.display()
-    elif selection == "Data":
+    if selection == "Data":
         data_webpage = Data()
         data_webpage.display()

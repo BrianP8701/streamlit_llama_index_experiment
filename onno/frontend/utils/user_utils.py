@@ -1,4 +1,4 @@
-from onno.shared.utils.database_utils import save_user_info, create_folder
+from onno.frontend.utils.database_utils import save_user_info, create_folder
 
 def initialize_user_info(username: str, hashed_password: str, email: str):
     user_info = {
@@ -12,4 +12,6 @@ def initialize_user_info(username: str, hashed_password: str, email: str):
     return user_info
 
 def create_new_empty_library(username: str, library_name: str):
-    create_folder(f'users/{username}/libraries/{library_name}/')
+    create_folder(f'users/{username}/libraries/{library_name}/raw/')
+    create_folder(f'users/{username}/libraries/{library_name}/text/')
+    
