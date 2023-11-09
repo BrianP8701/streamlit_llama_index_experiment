@@ -71,9 +71,9 @@ class Database:
         doc = doc_ref.get()
         return doc.exists
 
-    def hash_password(password: str) -> str:
+    def hash_password(self, password: str) -> str:
         hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
         return hashed.decode()
 
-    def check_password(password: str, hashed_password: str) -> bool:
+    def check_password(self, password: str, hashed_password: str) -> bool:
         return bcrypt.checkpw(password.encode(), hashed_password.encode())
