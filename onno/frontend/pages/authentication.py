@@ -15,7 +15,8 @@ class Authentication:
             password = st.text_input("Password", key='login_password', type="password")
             if st.button("Login"):
                 if st.session_state['DATABASE'].check_username_exists(username):
-                    if st.session_state['DATABASE'].check_password(password, st.session_state['DATABASE'].get_password(username)):
+                    hashed_password = st.session_state['DATABASE'].get_password(username)
+                    if hashed_password and st.session_state['DATABASE'].check_password(password, hashed_password):
                         st.success("Logged In as {}".format(username))
                         st.session_state['logged_in'] = True
                         st.session_state['username'] = username
