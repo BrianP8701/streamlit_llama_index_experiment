@@ -1,90 +1,6 @@
 from google.cloud import storage
 from llama_index.node_parser import HierarchicalNodeParser
-from llama_index import VectorStoreIndex, load_index_from_storage, StorageContext
-from llama_index.schema import NodeWithScore
-import gcsfs
-import json
-import os
-
-'''
-We want a llamaindex manager with these :
-Attributes:
-- username
-- library name
-
-Methods:
-- update index (Add unadded documents into index)
-- retrieve index object from GCS in cloud function
-- save index back to GCS
-- get k similar
-'''
-
-
-class CloudLLAMA_Index_Manager:
-    '''
-    This class manages a llama-index object stored in a JSON file on the cloud.
-    Documents are added to the index and context is retrieved directly on the cloud without
-    downloading the index to the local file system.
-    
-    retrieve_context(messages) -> str
-    '''
-    def __init__(self, project_name, bucket_name, llama_index_gcs_path):
-        self.client = storage.Client(project=project_name)
-        self.bucket = self.client.bucket(bucket_name)
-        self.bucket_name = bucket_name
-        self.node_parser = HierarchicalNodeParser.from_defaults()
-        self.llama_index_gcs_path = llama_index_gcs_path
-        self.gcs = gcsfs.GCSFileSystem(project=project_name, token='secrets/onno-404216-b073f407c6eb.json')
-        self.index = self.retrieve_or_create_index()
-        
-    def retrieve_or_create_index(self):
-        if self.check_folder_exists(self.llama_index_gcs_path):
-            return self.retrieve_index_from_gcs()
-        else:
-            return self.create_new_index()
-
-    def create_new_index(self):
-        index = VectorStoreIndex([]) 
-        index.set_index_id(os.path.basename(self.llama_index_gcs_path))
-        self.save_index_to_gcs(index)
-        return index
-
-    def retrieve_index_from_gcs(self):
-        sc = StorageContext.from_defaults(persist_dir=self.bucket_name+'/'+self.llama_index_gcs_path, fs=self.gcs)
-        return load_index_from_storage(sc, os.path.basename(self.llama_index_gcs_path))
-    
-    def save_index_to_gcs(self, index):
-        index.storage_context.persist(self.bucket_name + '/' + self.llama_index_gcs_path, fs=self.gcs)
-
-    def check_folder_exists(self, folder_prefix):
-        blobs = self.bucket.list_blobs(prefix=folder_prefix)
-        return any(True for _ in blobs)  # Folder exists if there are objects with the specified prefix
-
-    def add_documents_to_index(self, documents_gcs_paths):
-        for gcs_path in documents_gcs_paths:
-            # Assuming documents are JSON files and we can use the JSON content as documents
-            data = self.gcs.open(gcs_path, 'r').read()
-            document = json.loads(data)
-            self.index.insert(document)
-        # Save the updated index back to GCS
-        self.save_index_to_gcs(self.index)
-
-# Cloud function handler
-def process_documents_and_update_index(data, context):
-    """
-    This function is triggered by an event that provides JSON payload with 'data' and 'index_path'.
-    """
-
-    documents_gcs_paths = data['onno/users/b/libraries/avalon/text/DL_MIT.pdf']
-    
-
-    manager = CloudLLAMA_Index_Manager('onno-404216', 'onno', 'Briansvectoryyyy')
-    manager.create_new_index()
-    manager.add_documents_to_index(documents_gcs_paths)
-    print(f"Updated index with documents from {documents_gcs_paths}")
-from google.cloud import storage
-from llama_index.node_parser import HierarchicalNodeParser
-from llama_index import VectorStoreIndex, load_index_from_storage, StorageContext
+from llama_index import VectorStoreIndex, load_index_from_storage, StorageContext, Document
 from llama_index.schema import NodeWithScore
 import functions_framework
 import gcsfs
@@ -97,8 +13,8 @@ def llama_index_handler(request):
     It dispatches the request to various handlers based on the function name specified in the request JSON.
 
     Functions:
-    - "create_new_index": Creates a new empty index and saves it to the specified GCS path.
     - "retrieve_context": Retrieves context based on the given messages from the request JSON.
+    - "add_documents_to_index": Adds documents to the index from the specified GCS folder.
     
     Args:
         request (flask.Request): The request object. Expected JSON structure:
@@ -140,7 +56,8 @@ class LLAMA_Index_Retriever:
 
     def dispatch(self, function_name, *args, **kwargs):
         function_map = {
-            'retrieve_context': self.retrieve_context
+            'retrieve_context': self.retrieve_context,
+            'add_documents_to_index': self.add_documents_to_index,
         }
         if function_name not in function_map:
             raise ValueError(f"Function {function_name} not found.")
@@ -172,3 +89,17 @@ class LLAMA_Index_Retriever:
     def retrieve_index_from_gcs(self):
         sc = StorageContext.from_defaults(persist_dir=self.bucket_name+'/'+self.llama_index_gcs_path, fs=self.gcs)
         return load_index_from_storage(sc, os.path.basename(self.llama_index_gcs_path))
+    
+    def add_documents_to_index(self, gcs_folder_prefix):
+        documents = self.get_documents(gcs_folder_prefix)
+        for doc in documents:
+            self.index.insert(doc)
+        self.save_index_to_gcs()
+    
+    def get_documents(self, gcs_folder_prefix):
+        documents = []
+        for blob in self.bucket.list_blobs(prefix=gcs_folder_prefix):
+            content = blob.download_as_text()
+            content = Document(text=content)
+            documents.append(content)
+        return documents

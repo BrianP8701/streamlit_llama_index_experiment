@@ -48,17 +48,15 @@ class RepoScraper():
             response.raise_for_status()  # Raises exception for HTTP errors
             contents = response.json()
             
-            if isinstance(contents, dict):  # Single file
-                if contents['name'] not in ignore_files:
-                    return {contents['path']: base64.b64decode(contents['content']).decode('utf-8')}
-                return {}
-
             all_contents = {}
-            for item in contents:
-                if item['type'] == 'dir' and item['name'] not in ignore_folders:
-                    all_contents.update(fetch_path_content(item['path']))
-                elif item['type'] == 'file' and item['name'] not in ignore_files:
-                    all_contents.update(fetch_path_content(item['path']))
+            if isinstance(contents, list):  # Directory contents
+                for item in contents:
+                    if item['type'] == 'dir' and item['name'] not in ignore_folders:
+                        all_contents.update(fetch_path_content(item['path']))
+                    elif item['type'] == 'file' and item['name'] not in ignore_files:
+                        file_response = requests.get(item['download_url'], headers=headers)
+                        file_response.raise_for_status()
+                        all_contents[item['path']] = file_response.text
             return all_contents
 
         return fetch_path_content("")
